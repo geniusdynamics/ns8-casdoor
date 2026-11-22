@@ -39,6 +39,20 @@
             "type": "string",
             "maxLength": 100,
             "pattern": "^[A-Za-z0-9._-]*$"
+        },
+        "admin_password": {
+            "type": "string",
+            "description": "New built-in/admin password, sent only to change it",
+            "anyOf": [
+                {
+                    "maxLength": 0
+                },
+                {
+                    "minLength": 12,
+                    "maxLength": 100,
+                    "pattern": "^\\S+$"
+                }
+            ]
         }
     }
 }

@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+# Admin-only action (no reader prefix): return the stored built-in/admin password.
+import json
+import sys
+from casdoor_directory import admin_password_status, env_value
+
+valid, initial = admin_password_status()
+json.dump({"username": "admin", "organization": "built-in",
+           "password": env_value("CASDOOR_INITIAL_PASSWORD"),
+           "valid": bool(valid), "is_initial": initial}, sys.stdout)

@@ -46,6 +46,21 @@
             "items": {
                 "type": "string"
             }
+        },
+        "admin_password_set": {
+            "type": "boolean",
+            "description": "An administrator chose the built-in/admin password"
+        },
+        "admin_password_is_initial": {
+            "type": "boolean",
+            "description": "The generated initial password still signs in"
+        },
+        "api_credentials_ok": {
+            "type": "boolean",
+            "description": "The module can call the Casdoor API"
+        },
+        "api_token_override": {
+            "type": "boolean"
         }
     }
 }

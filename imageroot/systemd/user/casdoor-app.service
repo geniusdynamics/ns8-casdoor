@@ -16,12 +16,15 @@ WorkingDirectory=%E/state
 Restart=always
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/casdoor-app.pid %t/casdoor-app.ctr-id
+ExecStartPre=runagent casdoor-init-data
 ExecStart=/usr/bin/podman run --conmon-pidfile %t/casdoor-app.pid \
     --cidfile %t/casdoor-app.ctr-id --cgroups=no-conmon \
     --pod-id-file %t/casdoor.pod-id --replace -d --name  casdoor-app \
     --env runmode=prod --env ldapServerPort=0 --env ldapsServerPort=0 \
     --env driverName=postgres --env dbName=casdoor \
     --env "initAdminPassword=${CASDOOR_INITIAL_PASSWORD}" \
+    --secret casdoor-init-data,type=mount,target=casdoor-init-data.json,uid=1000,gid=1000,mode=0400 \
+    --env initDataFile=/run/secrets/casdoor-init-data.json --env initDataNewOnly=true \
     --env "dataSourceName=user=postgres password=${POSTGRES_PASSWORD} host=127.0.0.1 port=5432 dbname=casdoor sslmode=disable" \
     ${CASDOOR_IMAGE}
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/casdoor-app.ctr-id -t 10
