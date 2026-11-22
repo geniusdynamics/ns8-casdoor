@@ -10,7 +10,7 @@ Check if casdoor is installed correctly
     ${output}  ${rc} =    Execute Command    add-module ${IMAGE_URL} 1
     ...    return_rc=True
     Should Be Equal As Integers    ${rc}  0
-    &{output} =    Evaluate    json.loads($output)    modules=json
+    &{output} =    Evaluate    ast.literal_eval($output)    modules=ast
     Set Suite Variable    ${module_id}    ${output.module_id}
 
 Check if casdoor can be configured
@@ -27,6 +27,7 @@ Check if casdoor configuration reads back
     Should Be Equal    ${config}[host]    ${TEST_HOST}
 
 Check Casdoor health through Traefik
+    Should Not Be Empty    ${module_id}
     Wait Until Keyword Succeeds    2 min    5 sec    Casdoor Health Is OK
 
 Check if casdoor is removed correctly
