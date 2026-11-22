@@ -41,7 +41,19 @@
     "host_format": "Must be a valid fully qualified domain name",
     "ldap_domain": "NS8 user domain",
     "ldap_organization": "Casdoor organization name",
-    "ldap_requirements": "Create a dedicated organization and configure the Casdoor API token before connecting a domain."
+    "ldap_requirements": "The module creates the organization, its application and the LDAP connector when you save.",
+    "admin_title": "Casdoor administrator",
+    "admin_user": "Admin user: admin (organization built-in)",
+    "copy_initial_password": "Copy initial password",
+    "copy_admin_password": "Copy admin password",
+    "copied": "Copied to clipboard",
+    "admin_password_changed": "The initial password was changed in Casdoor",
+    "admin_password_changed_description": "Sign in with the password you chose, or set a new one in the Admin password field below.",
+    "admin_password": "Admin password",
+    "admin_password_helper": "Leave empty to keep the current password. At least 12 characters, no spaces.",
+    "admin_password_too_short": "Use at least 12 characters",
+    "api_unavailable": "Automatic setup is not available",
+    "api_unavailable_description": "The module cannot reach the Casdoor API with its own credentials. Start Casdoor, or set an administrator API token with casdoor-directory-token as a fallback."
   },
   "about": {
     "title": "About"
@@ -57,7 +69,8 @@
     "get-name": "Get name",
     "list-backup-repositories": "List backup repositories",
     "list-backups": "List backups",
-    "list-installed-modules": "List installed modules"
+    "list-installed-modules": "List installed modules",
+    "reveal-admin-password": "Copy admin password"
   },
   "error": {
     "error": "Error",

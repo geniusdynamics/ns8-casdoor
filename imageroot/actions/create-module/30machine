@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+# Generate the client credentials of the module's private Casdoor application.
+from casdoor_directory import machine_credentials
+machine_credentials()

@@ -13,7 +13,7 @@ import os
 import sys
 import json
 import agent
-from casdoor_directory import CONFIG, domains, read
+from casdoor_directory import CONFIG, TOKEN, admin_password_status, domains, machine_ok, read
 
 # Prepare return variable
 config = {}
@@ -27,6 +27,12 @@ directory = read(CONFIG)
 config["ldap_domain"] = directory.get("domain", "")
 config["ldap_organization"] = directory.get("organization", "")
 config["ldap_domains"] = sorted(set(domains()) | ({config["ldap_domain"]} - {""}))
+
+valid, initial = admin_password_status()
+config["admin_password_set"] = not initial
+config["admin_password_is_initial"] = bool(valid) and initial
+config["api_credentials_ok"] = machine_ok()
+config["api_token_override"] = bool(read(TOKEN).get("token"))
 
 # Dump the configuration to stdout
 json.dump(config, fp=sys.stdout)
