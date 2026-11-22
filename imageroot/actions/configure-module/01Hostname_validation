@@ -24,7 +24,7 @@ host = data["host"]
 # do not test if it is the same host
 oldHost = os.environ.get('TRAEFIK_HOST','')
 
-if host != oldHost and read(CONFIG):
+if oldHost and host != oldHost and "ldap_domain" in data and read(CONFIG):
     raise SystemExit("Disconnect the Casdoor directory before changing its hostname.")
 
 if host != oldHost and agent.http_route_in_use(domain=host):

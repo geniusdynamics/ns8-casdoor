@@ -13,4 +13,4 @@ exec 1>&2
 
 
 systemctl --user enable casdoor.service
-systemctl --user restart casdoor.service postgresql-app.service casdoor-app.service
+systemctl --user start casdoor.service
