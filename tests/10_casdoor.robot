@@ -68,10 +68,10 @@ Check if a domain and organization create the LDAP connector without a token
     ${result} =    Evaluate    json.loads($output)    modules=json
     Should Be Equal    ${result}[status]    ok    ${output}
     Should Contain    ${output}    ${ADMUSER}
-    ${org} =    Execute Command
+    ${org_json} =    Execute Command
     ...    curl --silent --insecure --resolve ${TEST_HOST}:443:127.0.0.1 --get --data-urlencode 'id=admin/${ORG}' --data-urlencode 'username=built-in/admin' --data-urlencode 'password=${initial_password}' https://${TEST_HOST}/api/get-organization
-    ${org} =    Evaluate    json.loads($org)    modules=json
-    Should Be Equal    ${org}[data][defaultApplication]    app-${ORG}
+    ${org_data} =    Evaluate    json.loads($org_json)    modules=json
+    Should Be Equal    ${org_data}[data][defaultApplication]    app-${ORG}
 
 Check if setting your own admin password works
     Run Module Action    ${module_id}    configure-module    {"host":"${TEST_HOST}","http2https":false,"admin_password":"${NEW_PASSWORD}"}
