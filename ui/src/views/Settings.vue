@@ -24,8 +24,8 @@
         <cv-tile light>
           <cv-form @submit.prevent="configureModule">
             <cv-text-input
-              :label="$t('settings.kickstart_fqdn')"
-              placeholder="kickstart.example.org"
+              :label="$t('settings.casdoor_fqdn')"
+              placeholder="casdoor.example.org"
               v-model.trim="host"
               class="mg-bottom"
               :invalid-message="$t(error.host)"
@@ -33,6 +33,25 @@
               ref="host"
             >
             </cv-text-input>
+            <cv-select
+              v-model="ldapDomain"
+              :label="$t('settings.ldap_domain')"
+              :disabled="stillLoading"
+              class="mg-bottom"
+            >
+              <cv-select-option value="">{{ $t("settings.disabled") }}</cv-select-option>
+              <cv-select-option v-for="domain in ldapDomains" :key="domain" :value="domain">
+                {{ domain }}
+              </cv-select-option>
+            </cv-select>
+            <cv-text-input
+              v-if="ldapDomain"
+              v-model.trim="ldapOrganization"
+              :label="$t('settings.ldap_organization')"
+              :helper-text="$t('settings.ldap_requirements')"
+              :disabled="stillLoading"
+              class="mg-bottom"
+            />
             <NsToggle
               value="letsEncrypt"
               :label="core.$t('apps_lets_encrypt.request_https_certificate')"
@@ -189,6 +208,9 @@ export default {
       validationErrorDetails: [],
       urlCheckInterval: null,
       host: "",
+      ldapDomain: "",
+      ldapOrganization: "",
+      ldapDomains: [],
       isLetsEncryptEnabled: false,
       isLetsEncryptCurrentlyEnabled: false,
       isHttpToHttpsEnabled: true,
@@ -322,6 +344,9 @@ export default {
     getConfigurationCompleted(taskContext, taskResult) {
       const config = taskResult.output;
       this.host = config.host;
+      this.ldapDomain = config.ldap_domain || "";
+      this.ldapOrganization = config.ldap_organization || "";
+      this.ldapDomains = config.ldap_domains || [];
       this.isLetsEncryptEnabled = config.lets_encrypt;
       this.isLetsEncryptCurrentlyEnabled = config.lets_encrypt;
       this.isHttpToHttpsEnabled = config.http2https;
@@ -398,6 +423,8 @@ export default {
           action: taskAction,
           data: {
             host: this.host,
+            ldap_domain: this.ldapDomain,
+            ldap_organization: this.ldapDomain ? this.ldapOrganization : "",
             lets_encrypt: this.isLetsEncryptEnabled,
             http2https: this.isHttpToHttpsEnabled,
           },

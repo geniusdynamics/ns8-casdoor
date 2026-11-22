@@ -13,6 +13,7 @@ import os
 import sys
 import json
 import agent
+from casdoor_directory import CONFIG, domains, read
 
 # Prepare return variable
 config = {}
@@ -21,6 +22,11 @@ config = {}
 config["host"] = os.getenv("TRAEFIK_HOST","")
 config["http2https"] = os.getenv("TRAEFIK_HTTP2HTTPS") == "True"
 config["lets_encrypt"] = agent.get_route(os.environ['MODULE_ID']).get('lets_encrypt', False)
+
+directory = read(CONFIG)
+config["ldap_domain"] = directory.get("domain", "")
+config["ldap_organization"] = directory.get("organization", "")
+config["ldap_domains"] = sorted(set(domains()) | ({config["ldap_domain"]} - {""}))
 
 # Dump the configuration to stdout
 json.dump(config, fp=sys.stdout)

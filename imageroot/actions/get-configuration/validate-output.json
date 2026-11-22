@@ -1,11 +1,11 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Get kickstart settings",
-    "$id": "http://nethserver.org/json-schema/task/input/kickstart/get-configuration",
-    "description": "Get kickstart settings",
+    "title": "Get casdoor settings",
+    "$id": "http://nethserver.org/json-schema/task/input/casdoor/get-configuration",
+    "description": "Get casdoor settings",
     "examples": [
         {
-            "host": "kickstart.domain.org",
+            "host": "casdoor.domain.org",
             "http2https": true,
             "lets_encrypt": true
         }
@@ -19,7 +19,7 @@
     "properties": {
         "host": {
             "type": "string",
-            "description": "Host name for the application, like 'kickstart.domain.org'",
+            "description": "Host name for the application, like 'casdoor.domain.org'",
             "format": "idn-hostname"
         },
         "lets_encrypt": {
@@ -31,6 +31,21 @@
             "type": "boolean",
             "title": "HTTP to HTTPS redirection",
             "description": "Redirect all the HTTP requests to HTTPS"
+        },
+        "ldap_domain": {
+            "type": "string",
+            "maxLength": 253
+        },
+        "ldap_organization": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9._-]*$"
+        },
+        "ldap_domains": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         }
     }
 }
