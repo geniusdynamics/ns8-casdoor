@@ -39,8 +39,14 @@
               :disabled="stillLoading"
               class="mg-bottom"
             >
-              <cv-select-option value="">{{ $t("settings.disabled") }}</cv-select-option>
-              <cv-select-option v-for="domain in ldapDomains" :key="domain" :value="domain">
+              <cv-select-option value="">{{
+                $t("settings.disabled")
+              }}</cv-select-option>
+              <cv-select-option
+                v-for="domain in ldapDomains"
+                :key="domain"
+                :value="domain"
+              >
                 {{ domain }}
               </cv-select-option>
             </cv-select>

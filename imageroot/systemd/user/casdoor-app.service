@@ -19,6 +19,7 @@ ExecStartPre=/bin/rm -f %t/casdoor-app.pid %t/casdoor-app.ctr-id
 ExecStart=/usr/bin/podman run --conmon-pidfile %t/casdoor-app.pid \
     --cidfile %t/casdoor-app.ctr-id --cgroups=no-conmon \
     --pod-id-file %t/casdoor.pod-id --replace -d --name  casdoor-app \
+    --env runmode=prod --env ldapServerPort=0 --env ldapsServerPort=0 \
     --env driverName=postgres --env dbName=casdoor \
     --env "initAdminPassword=${CASDOOR_INITIAL_PASSWORD}" \
     --env "dataSourceName=user=postgres password=${POSTGRES_PASSWORD} host=127.0.0.1 port=5432 dbname=casdoor sslmode=disable" \
