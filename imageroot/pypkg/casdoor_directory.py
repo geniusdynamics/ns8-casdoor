@@ -126,7 +126,7 @@ def api(host, action, *, query=None, body=None, form=None):
     try:
         with build_opener(NoRedirect()).open(request, timeout=15) as response:
             result = json.load(response)
-    except (HTTPError, URLError, TimeoutError, ValueError):
+    except (OSError, ValueError):  # HTTPError, URLError, resets and timeouts
         raise RuntimeError(f"Casdoor {action} failed. Check that Casdoor is running.") from None
     if result.get("status") != "ok":
         # The message never contains request secrets.
