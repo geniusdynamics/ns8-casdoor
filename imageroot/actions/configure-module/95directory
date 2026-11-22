@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import json
 import sys
-from casdoor_directory import reconcile
+from casdoor_directory import reconcile, wait_ready
 
 request = json.load(sys.stdin)
 if "ldap_domain" in request:
+    if request["ldap_domain"] and not wait_ready():
+        raise SystemExit("Casdoor did not start.")
     reconcile(request["host"], request["ldap_domain"], request.get("ldap_organization", ""))

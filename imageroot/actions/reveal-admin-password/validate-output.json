@@ -1,0 +1,14 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Reveal the Casdoor built-in admin password",
+    "$id": "http://nethserver.org/json-schema/task/output/casdoor/reveal-admin-password",
+    "type": "object",
+    "required": ["username", "organization", "password", "valid", "is_initial"],
+    "properties": {
+        "username": {"type": "string"},
+        "organization": {"type": "string"},
+        "password": {"type": "string"},
+        "valid": {"type": "boolean", "description": "The stored password still signs in"},
+        "is_initial": {"type": "boolean"}
+    }
+}

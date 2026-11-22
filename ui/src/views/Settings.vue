@@ -21,6 +21,50 @@
     </cv-row>
     <cv-row>
       <cv-column>
+        <cv-tile light class="mg-bottom">
+          <h4 class="mg-bottom-sm">{{ $t("settings.admin_title") }}</h4>
+          <p class="mg-bottom-sm">{{ $t("settings.admin_user") }}</p>
+          <NsInlineNotification
+            v-if="!loading.getConfiguration && adminPasswordChanged"
+            kind="info"
+            :title="$t('settings.admin_password_changed')"
+            :description="$t('settings.admin_password_changed_description')"
+            :showCloseButton="false"
+          />
+          <NsInlineNotification
+            v-if="error.revealAdminPassword"
+            kind="error"
+            :title="$t('action.reveal-admin-password')"
+            :description="error.revealAdminPassword"
+            :showCloseButton="false"
+          />
+          <NsButton
+            kind="secondary"
+            :icon="Password20"
+            :loading="loading.revealAdminPassword"
+            :disabled="stillLoading || adminPasswordChanged"
+            @click="copyAdminPassword"
+            >{{
+              copied
+                ? $t("settings.copied")
+                : adminPasswordSet
+                ? $t("settings.copy_admin_password")
+                : $t("settings.copy_initial_password")
+            }}</NsButton
+          >
+          <NsInlineNotification
+            v-if="!loading.getConfiguration && !apiCredentialsOk"
+            kind="warning"
+            :title="$t('settings.api_unavailable')"
+            :description="$t('settings.api_unavailable_description')"
+            :showCloseButton="false"
+            class="mg-top"
+          />
+        </cv-tile>
+      </cv-column>
+    </cv-row>
+    <cv-row>
+      <cv-column>
         <cv-tile light>
           <cv-form @submit.prevent="configureModule">
             <cv-text-input
@@ -57,6 +101,17 @@
               :helper-text="$t('settings.ldap_requirements')"
               :disabled="stillLoading"
               class="mg-bottom"
+            />
+            <cv-text-input
+              type="password"
+              autocomplete="new-password"
+              v-model="adminPassword"
+              :label="$t('settings.admin_password')"
+              :helper-text="$t('settings.admin_password_helper')"
+              :invalid-message="error.admin_password"
+              :disabled="stillLoading"
+              class="mg-bottom"
+              ref="admin_password"
             />
             <NsToggle
               value="letsEncrypt"
@@ -217,6 +272,11 @@ export default {
       ldapDomain: "",
       ldapOrganization: "",
       ldapDomains: [],
+      adminPassword: "",
+      adminPasswordSet: false,
+      adminPasswordChanged: false,
+      apiCredentialsOk: true,
+      copied: false,
       isLetsEncryptEnabled: false,
       isLetsEncryptCurrentlyEnabled: false,
       isHttpToHttpsEnabled: true,
@@ -224,8 +284,11 @@ export default {
         getConfiguration: false,
         configureModule: false,
         getStatus: false,
+        revealAdminPassword: false,
       },
       error: {
+        revealAdminPassword: "",
+        admin_password: "",
         getConfiguration: "",
         configureModule: "",
         host: "",
@@ -356,6 +419,11 @@ export default {
       this.isLetsEncryptEnabled = config.lets_encrypt;
       this.isLetsEncryptCurrentlyEnabled = config.lets_encrypt;
       this.isHttpToHttpsEnabled = config.http2https;
+      this.adminPasswordSet = !!config.admin_password_set;
+      // Neither the initial nor a password set here signs in any more
+      this.adminPasswordChanged =
+        !config.admin_password_is_initial && !config.admin_password_set;
+      this.apiCredentialsOk = config.api_credentials_ok !== false;
 
       this.loading.getConfiguration = false;
       this.focusElement("host");
@@ -373,7 +441,64 @@ export default {
         }
         isValidationOk = false;
       }
+      if (this.adminPassword && this.adminPassword.length < 12) {
+        this.error.admin_password = this.$t(
+          "settings.admin_password_too_short"
+        );
+        isValidationOk = false;
+      }
       return isValidationOk;
+    },
+    async copyAdminPassword() {
+      this.loading.revealAdminPassword = true;
+      this.error.revealAdminPassword = "";
+      const taskAction = "reveal-admin-password";
+      const eventId = this.getUuid();
+      this.core.$root.$once(`${taskAction}-aborted-${eventId}`, () => {
+        this.error.revealAdminPassword = this.$t("error.generic_error");
+        this.loading.revealAdminPassword = false;
+      });
+      this.core.$root.$once(
+        `${taskAction}-completed-${eventId}`,
+        async (taskContext, taskResult) => {
+          // The password goes straight to the clipboard: never kept in data or the store
+          await this.writeClipboard(taskResult.output.password);
+          this.loading.revealAdminPassword = false;
+          this.copied = true;
+          setTimeout(() => (this.copied = false), 3000);
+        }
+      );
+      const res = await to(
+        this.createModuleTaskForApp(this.instanceName, {
+          action: taskAction,
+          extra: {
+            title: this.$t("action." + taskAction),
+            isNotificationHidden: true,
+            eventId,
+          },
+        })
+      );
+      if (res[0]) {
+        this.error.revealAdminPassword = this.getErrorMessage(res[0]);
+        this.loading.revealAdminPassword = false;
+      }
+    },
+    async writeClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return;
+      } catch (e) {
+        // The task finished after the click, some browsers need the fallback
+      }
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.setAttribute("readonly", "");
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      document.body.removeChild(area);
     },
     configureModuleValidationFailed(validationErrors) {
       this.loading.configureModule = false;
@@ -433,6 +558,9 @@ export default {
             ldap_organization: this.ldapDomain ? this.ldapOrganization : "",
             lets_encrypt: this.isLetsEncryptEnabled,
             http2https: this.isHttpToHttpsEnabled,
+            ...(this.adminPassword
+              ? { admin_password: this.adminPassword }
+              : {}),
           },
           extra: {
             title: this.$t("settings.instance_configuration", {
@@ -459,6 +587,7 @@ export default {
     },
     configureModuleCompleted() {
       this.loading.configureModule = false;
+      this.adminPassword = "";
 
       // reload configuration
       this.getConfiguration();
@@ -471,6 +600,14 @@ export default {
 @import "../styles/carbon-utils";
 .mg-bottom {
   margin-bottom: $spacing-06;
+}
+
+.mg-bottom-sm {
+  margin-bottom: $spacing-03;
+}
+
+.mg-top {
+  margin-top: $spacing-05;
 }
 
 .maxwidth {
