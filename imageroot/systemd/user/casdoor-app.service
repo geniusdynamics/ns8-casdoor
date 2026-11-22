@@ -1,0 +1,35 @@
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+[Unit]
+Description=Podman  casdoor-app.service
+BindsTo=casdoor.service
+After=casdoor.service postgresql-app.service
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=%E/state/environment
+EnvironmentFile=%E/state/database.env
+WorkingDirectory=%E/state
+Restart=always
+TimeoutStopSec=70
+ExecStartPre=/bin/rm -f %t/casdoor-app.pid %t/casdoor-app.ctr-id
+ExecStart=/usr/bin/podman run --conmon-pidfile %t/casdoor-app.pid \
+    --cidfile %t/casdoor-app.ctr-id --cgroups=no-conmon \
+    --pod-id-file %t/casdoor.pod-id --replace -d --name  casdoor-app \
+    --env runmode=prod --env ldapServerPort=0 --env ldapsServerPort=0 \
+    --env driverName=postgres --env dbName=casdoor \
+    --env "initAdminPassword=${CASDOOR_INITIAL_PASSWORD}" \
+    --env "dataSourceName=user=postgres password=${POSTGRES_PASSWORD} host=127.0.0.1 port=5432 dbname=casdoor sslmode=disable" \
+    ${CASDOOR_IMAGE}
+ExecStop=/usr/bin/podman stop --ignore --cidfile %t/casdoor-app.ctr-id -t 10
+ExecReload=/usr/bin/podman kill -s HUP casdoor-app
+SyslogIdentifier=%u
+ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/casdoor-app.ctr-id
+PIDFile=%t/casdoor-app.pid
+Type=forking
+
+[Install]
+WantedBy=default.target

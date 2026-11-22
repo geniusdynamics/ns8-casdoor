@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+import getpass
+import os
+from casdoor_directory import TOKEN, write
+
+host = os.environ.get("TRAEFIK_HOST", "")
+if not host:
+    raise SystemExit("Configure the Casdoor hostname in NS8 first.")
+token = getpass.getpass("Casdoor administrator API access token (empty clears it): ").strip()
+if token:
+    write(TOKEN, {"host": host, "token": token})
+else:
+    TOKEN.unlink(missing_ok=True)

@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+import json
+import sys
+from casdoor_directory import reconcile
+
+request = json.load(sys.stdin)
+if "ldap_domain" in request:
+    reconcile(request["host"], request["ldap_domain"], request.get("ldap_organization", ""))

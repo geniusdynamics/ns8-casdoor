@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+import os
+from casdoor_directory import CONFIG, reconcile
+
+if CONFIG.exists() and os.environ.get("TRAEFIK_HOST"):
+    reconcile(os.environ["TRAEFIK_HOST"], "", "", refresh=True)

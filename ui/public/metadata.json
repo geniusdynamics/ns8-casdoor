@@ -1,19 +1,19 @@
 {
-  "name": "kickstart",
+  "name": "Casdoor",
   "description": {
-    "en": "My kickstart module"
+    "en": "Manage application identities and sign-in using Casdoor and external directories."
   },
   "categories": [],
   "authors": [
     {
-      "name": "Name Surname",
-      "email": "author@yourmail.org"
+      "name": "Genius Dynamics",
+      "email": "resources@genius-dynamics.com"
     }
   ],
   "docs": {
-    "documentation_url": "https://docs.kickstart.com/",
-    "bug_url": "https://github.com/NethServer/dev",
-    "code_url": "https://github.com/author/ns8-kickstart"
+    "documentation_url": "https://casdoor.org/docs/overview",
+    "bug_url": "https://github.com/geniusdynamics/ns8-casdoor/issues",
+    "code_url": "https://github.com/geniusdynamics/ns8-casdoor"
   },
-  "source": "ghcr.io/nethserver/kickstart"
+  "source": "ghcr.io/geniusdynamics/casdoor"
 }
